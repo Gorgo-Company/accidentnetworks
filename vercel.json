@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "name": "accident-networks",
+  "public": false,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "styles.css", "use": "@vercel/static" },
+    { "src": "loader.js", "use": "@vercel/static" },
+    { "src": "configs/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    {
+      "src": "/styles.css",
+      "dest": "/styles.css",
+      "headers": { "cache-control": "public, max-age=604800, stale-while-revalidate=86400" }
+    },
+    {
+      "src": "/loader.js",
+      "dest": "/loader.js",
+      "headers": { "cache-control": "public, max-age=3600" }
+    },
+    {
+      "src": "/configs/(.*)",
+      "dest": "/configs/$1",
+      "headers": { "cache-control": "public, max-age=86400" }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html",
+      "headers": { "cache-control": "public, max-age=300" }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}

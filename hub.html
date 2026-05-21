@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accident Networks — Free Car Accident Helpline | All 50 States</title>
+  <meta name="description" content="Free 24/7 car accident helpline available nationwide. Connect with top-rated attorneys and doctors in your city. No fees, no obligation, available in all 50 states.">
+  <link rel="canonical" href="https://accidentnetworks.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LegalService",
+    "name": "Accident Networks",
+    "url": "https://accidentnetworks.com",
+    "description": "Free 24/7 car accident helpline available in all 50 states. Connect accident victims with top-rated attorneys and chiropractors at zero cost.",
+    "priceRange": "Free",
+    "serviceType": "Car Accident Referral Service",
+    "openingHours": "Mo-Su 00:00-23:59",
+    "areaServed": { "@type": "Country", "name": "United States" }
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1D2F55;
+      --gold: #D4AF37;
+      --gold-light: #e8c84a;
+      --white: #ffffff;
+      --gray-100: #f1f5f9;
+      --gray-200: #e2e8f0;
+      --gray-500: #64748b;
+      --gray-800: #1e293b;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'Inter', sans-serif;
+    }
+    body {
+      font-family: var(--font-body);
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    .hub-header {
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hub-logo {
+      font-family: var(--font-display);
+      font-size: 28px;
+      letter-spacing: 1px;
+      color: var(--white);
+      line-height: 1;
+    }
+    .hub-logo span { color: var(--gold); }
+
+    /* ── Hero detection area ── */
+    .hub-hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      text-align: center;
+    }
+    .hub-headline {
+      font-family: var(--font-display);
+      font-size: clamp(52px, 8vw, 100px);
+      line-height: 0.92;
+      margin-bottom: 16px;
+    }
+    .hub-headline span { color: var(--gold); }
+    .hub-sub {
+      font-size: 18px;
+      color: rgba(255,255,255,0.75);
+      max-width: 480px;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    /* ── Geo detection status ── */
+    .geo-status-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      min-height: 80px;
+    }
+    .geo-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(212,175,55,0.25);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #geo-status {
+      font-size: 15px;
+      color: rgba(255,255,255,0.7);
+      font-weight: 500;
+      min-height: 22px;
+    }
+
+    /* ── Fallback picker (shown only if geo fails) ── */
+    #geo-picker {
+      display: none;
+      padding: 14px 20px;
+      border-radius: 12px;
+      border: 2px solid var(--gold);
+      background: rgba(255,255,255,0.08);
+      color: var(--white);
+      font-size: 16px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      min-width: 260px;
+      backdrop-filter: blur(8px);
+    }
+    #geo-picker option { background: var(--navy); color: var(--white); }
+    #geo-picker:focus { border-color: var(--gold-light); }
+
+    /* ── State grid (shown if picker shown) ── */
+    #state-grid {
+      display: none;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-width: 680px;
+      width: 100%;
+      margin-top: 32px;
+    }
+    .state-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 12px 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      gap: 3px;
+    }
+    .state-btn:hover {
+      background: rgba(212,175,55,0.15);
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .state-btn .code {
+      font-family: var(--font-display);
+      font-size: 22px;
+      color: var(--white);
+      line-height: 1;
+    }
+    .state-btn .name {
+      font-size: 10px;
+      color: rgba(255,255,255,0.55);
+      font-weight: 500;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    /* ── Trust strip ── */
+    .hub-trust {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      padding: 24px 32px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      flex-wrap: wrap;
+    }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 500;
+    }
+    .trust-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      #state-grid { grid-template-columns: repeat(3, 1fr); }
+      .hub-trust { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="hub-header">
+    <div class="hub-logo">ACCIDENT <span>NETWORKS</span></div>
+  </header>
+
+  <main class="hub-hero">
+    <h1 class="hub-headline">
+      FREE HELP.<br>
+      <span>YOUR CITY.</span>
+    </h1>
+    <p class="hub-sub">
+      Car accident? Get connected with top-rated attorneys and doctors near you — 100% free, 24/7.
+    </p>
+
+    <div class="geo-status-wrap">
+      <div class="geo-spinner" id="geo-spinner"></div>
+      <div id="geo-status">Finding your location…</div>
+
+      <!-- Shown only if auto-detection fails -->
+      <select id="geo-picker" aria-label="Select your state">
+        <option value="">Select your state…</option>
+        <option value="birmingham">Alabama — Birmingham</option>
+        <option value="anchorage">Alaska — Anchorage</option>
+        <option value="phoenix">Arizona — Phoenix</option>
+        <option value="little-rock">Arkansas — Little Rock</option>
+        <option value="los-angeles">California — Los Angeles</option>
+        <option value="denver">Colorado — Denver</option>
+        <option value="bridgeport">Connecticut — Bridgeport</option>
+        <option value="wilmington">Delaware — Wilmington</option>
+        <option value="tampa">Florida — Tampa</option>
+        <option value="atlanta">Georgia — Atlanta</option>
+        <option value="honolulu">Hawaii — Honolulu</option>
+        <option value="boise">Idaho — Boise</option>
+        <option value="chicago">Illinois — Chicago</option>
+        <option value="indianapolis">Indiana — Indianapolis</option>
+        <option value="des-moines">Iowa — Des Moines</option>
+        <option value="wichita">Kansas — Wichita</option>
+        <option value="louisville">Kentucky — Louisville</option>
+        <option value="new-orleans">Louisiana — New Orleans</option>
+        <option value="portland-me">Maine — Portland</option>
+        <option value="baltimore">Maryland — Baltimore</option>
+        <option value="boston">Massachusetts — Boston</option>
+        <option value="detroit">Michigan — Detroit</option>
+        <option value="minneapolis">Minnesota — Minneapolis</option>
+        <option value="jackson">Mississippi — Jackson</option>
+        <option value="kansas-city">Missouri — Kansas City</option>
+        <option value="billings">Montana — Billings</option>
+        <option value="omaha">Nebraska — Omaha</option>
+        <option value="las-vegas">Nevada — Las Vegas</option>
+        <option value="manchester">New Hampshire — Manchester</option>
+        <option value="newark">New Jersey — Newark</option>
+        <option value="albuquerque">New Mexico — Albuquerque</option>
+        <option value="new-york">New York — New York City</option>
+        <option value="charlotte">North Carolina — Charlotte</option>
+        <option value="fargo">North Dakota — Fargo</option>
+        <option value="columbus">Ohio — Columbus</option>
+        <option value="oklahoma-city">Oklahoma — Oklahoma City</option>
+        <option value="portland-or">Oregon — Portland</option>
+        <option value="philadelphia">Pennsylvania — Philadelphia</option>
+        <option value="providence">Rhode Island — Providence</option>
+        <option value="columbia">South Carolina — Columbia</option>
+        <option value="sioux-falls">South Dakota — Sioux Falls</option>
+        <option value="memphis">Tennessee — Memphis</option>
+        <option value="houston">Texas — Houston</option>
+        <option value="salt-lake-city">Utah — Salt Lake City</option>
+        <option value="burlington">Vermont — Burlington</option>
+        <option value="virginia-beach">Virginia — Virginia Beach</option>
+        <option value="seattle">Washington — Seattle</option>
+        <option value="charleston">West Virginia — Charleston</option>
+        <option value="milwaukee">Wisconsin — Milwaukee</option>
+        <option value="cheyenne">Wyoming — Cheyenne</option>
+      </select>
+    </div>
+
+    <!-- State grid — visible only after geo fails -->
+    <div id="state-grid" role="navigation" aria-label="Select your state">
+      <a class="state-btn" href="#" data-city="birmingham"><span class="code">AL</span><span class="name">Birmingham</span></a>
+      <a class="state-btn" href="#" data-city="anchorage"><span class="code">AK</span><span class="name">Anchorage</span></a>
+      <a class="state-btn" href="#" data-city="phoenix"><span class="code">AZ</span><span class="name">Phoenix</span></a>
+      <a class="state-btn" href="#" data-city="little-rock"><span class="code">AR</span><span class="name">Little Rock</span></a>
+      <a class="state-btn" href="#" data-city="los-angeles"><span class="code">CA</span><span class="name">Los Angeles</span></a>
+      <a class="state-btn" href="#" data-city="denver"><span class="code">CO</span><span class="name">Denver</span></a>
+      <a class="state-btn" href="#" data-city="bridgeport"><span class="code">CT</span><span class="name">Bridgeport</span></a>
+      <a class="state-btn" href="#" data-city="wilmington"><span class="code">DE</span><span class="name">Wilmington</span></a>
+      <a class="state-btn" href="#" data-city="tampa"><span class="code">FL</span><span class="name">Tampa</span></a>
+      <a class="state-btn" href="#" data-city="atlanta"><span class="code">GA</span><span class="name">Atlanta</span></a>
+      <a class="state-btn" href="#" data-city="honolulu"><span class="code">HI</span><span class="name">Honolulu</span></a>
+      <a class="state-btn" href="#" data-city="boise"><span class="code">ID</span><span class="name">Boise</span></a>
+      <a class="state-btn" href="#" data-city="chicago"><span class="code">IL</span><span class="name">Chicago</span></a>
+      <a class="state-btn" href="#" data-city="indianapolis"><span class="code">IN</span><span class="name">Indianapolis</span></a>
+      <a class="state-btn" href="#" data-city="des-moines"><span class="code">IA</span><span class="name">Des Moines</span></a>
+      <a class="state-btn" href="#" data-city="wichita"><span class="code">KS</span><span class="name">Wichita</span></a>
+      <a class="state-btn" href="#" data-city="louisville"><span class="code">KY</span><span class="name">Louisville</span></a>
+      <a class="state-btn" href="#" data-city="new-orleans"><span class="code">LA</span><span class="name">New Orleans</span></a>
+      <a class="state-btn" href="#" data-city="portland-me"><span class="code">ME</span><span class="name">Portland</span></a>
+      <a class="state-btn" href="#" data-city="baltimore"><span class="code">MD</span><span class="name">Baltimore</span></a>
+      <a class="state-btn" href="#" data-city="boston"><span class="code">MA</span><span class="name">Boston</span></a>
+      <a class="state-btn" href="#" data-city="detroit"><span class="code">MI</span><span class="name">Detroit</span></a>
+      <a class="state-btn" href="#" data-city="minneapolis"><span class="code">MN</span><span class="name">Minneapolis</span></a>
+      <a class="state-btn" href="#" data-city="jackson"><span class="code">MS</span><span class="name">Jackson</span></a>
+      <a class="state-btn" href="#" data-city="kansas-city"><span class="code">MO</span><span class="name">Kansas City</span></a>
+      <a class="state-btn" href="#" data-city="billings"><span class="code">MT</span><span class="name">Billings</span></a>
+      <a class="state-btn" href="#" data-city="omaha"><span class="code">NE</span><span class="name">Omaha</span></a>
+      <a class="state-btn" href="#" data-city="las-vegas"><span class="code">NV</span><span class="name">Las Vegas</span></a>
+      <a class="state-btn" href="#" data-city="manchester"><span class="code">NH</span><span class="name">Manchester</span></a>
+      <a class="state-btn" href="#" data-city="newark"><span class="code">NJ</span><span class="name">Newark</span></a>
+      <a class="state-btn" href="#" data-city="albuquerque"><span class="code">NM</span><span class="name">Albuquerque</span></a>
+      <a class="state-btn" href="#" data-city="new-york"><span class="code">NY</span><span class="name">New York City</span></a>
+      <a class="state-btn" href="#" data-city="charlotte"><span class="code">NC</span><span class="name">Charlotte</span></a>
+      <a class="state-btn" href="#" data-city="fargo"><span class="code">ND</span><span class="name">Fargo</span></a>
+      <a class="state-btn" href="#" data-city="columbus"><span class="code">OH</span><span class="name">Columbus</span></a>
+      <a class="state-btn" href="#" data-city="oklahoma-city"><span class="code">OK</span><span class="name">Oklahoma City</span></a>
+      <a class="state-btn" href="#" data-city="portland-or"><span class="code">OR</span><span class="name">Portland</span></a>
+      <a class="state-btn" href="#" data-city="philadelphia"><span class="code">PA</span><span class="name">Philadelphia</span></a>
+      <a class="state-btn" href="#" data-city="providence"><span class="code">RI</span><span class="name">Providence</span></a>
+      <a class="state-btn" href="#" data-city="columbia"><span class="code">SC</span><span class="name">Columbia</span></a>
+      <a class="state-btn" href="#" data-city="sioux-falls"><span class="code">SD</span><span class="name">Sioux Falls</span></a>
+      <a class="state-btn" href="#" data-city="memphis"><span class="code">TN</span><span class="name">Memphis</span></a>
+      <a class="state-btn" href="#" data-city="houston"><span class="code">TX</span><span class="name">Houston</span></a>
+      <a class="state-btn" href="#" data-city="salt-lake-city"><span class="code">UT</span><span class="name">Salt Lake City</span></a>
+      <a class="state-btn" href="#" data-city="burlington"><span class="code">VT</span><span class="name">Burlington</span></a>
+      <a class="state-btn" href="#" data-city="virginia-beach"><span class="code">VA</span><span class="name">Virginia Beach</span></a>
+      <a class="state-btn" href="#" data-city="seattle"><span class="code">WA</span><span class="name">Seattle</span></a>
+      <a class="state-btn" href="#" data-city="charleston"><span class="code">WV</span><span class="name">Charleston</span></a>
+      <a class="state-btn" href="#" data-city="milwaukee"><span class="code">WI</span><span class="name">Milwaukee</span></a>
+      <a class="state-btn" href="#" data-city="cheyenne"><span class="code">WY</span><span class="name">Cheyenne</span></a>
+    </div>
+  </main>
+
+  <footer class="hub-trust">
+    <div class="trust-item"><div class="trust-dot"></div> 100% Free Service</div>
+    <div class="trust-item"><div class="trust-dot"></div> No Win, No Fee</div>
+    <div class="trust-item"><div class="trust-dot"></div> Available 24/7</div>
+    <div class="trust-item"><div class="trust-dot"></div> All 50 States</div>
+    <div class="trust-item"><div class="trust-dot"></div> Same-Day Appointments</div>
+  </footer>
+
+  <script>
+    // Wire state grid buttons
+    document.querySelectorAll('.state-btn[data-city]').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var id = btn.getAttribute('data-city');
+        if (id) {
+          try { sessionStorage.setItem('an_city', id); } catch(ex) {}
+          var host = window.location.hostname;
+          if (host === 'localhost' || host === '127.0.0.1' || window.location.protocol === 'file:') {
+            window.location.href = 'index.html?city=' + id;
+          } else {
+            window.location.href = 'https://' + id + '.accidentnetworks.com';
+          }
+        }
+      });
+    });
+
+    // Hide spinner once picker shows
+    var observer = new MutationObserver(function() {
+      var picker = document.getElementById('geo-picker');
+      if (picker && picker.style.display !== 'none') {
+        var spinner = document.getElementById('geo-spinner');
+        if (spinner) spinner.style.display = 'none';
+      }
+    });
+    observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['style'] });
+  </script>
+
+  <!-- geo.js fires immediately, redirects before user sees this page if location found -->
+  <script src="geo.js"></script>
+
+</body>
+</html>
