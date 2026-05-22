@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accident Networks — Lead Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #1D2F55; --navy-dark: #0f1e3d; --navy-light: #2a4070;
+  --gold: #D4AF37; --gold-light: #e8c84a; --gold-dark: #b8960f;
+  --white: #ffffff; --gray-50: #f8fafc; --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0; --gray-400: #94a3b8; --gray-500: #64748b;
+  --gray-600: #475569; --gray-700: #334155; --gray-800: #1e293b;
+  --green: #16a34a; --green-light: #dcfce7;
+  --red: #dc2626; --red-light: #fee2e2;
+  --yellow: #d97706; --yellow-light: #fef3c7;
+  --blue: #2563eb; --blue-light: #dbeafe;
+  --purple: #7c3aed; --purple-light: #ede9fe;
+  --font-display: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius: 12px; --radius-sm: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { overflow-x: hidden; }
+body { font-family: var(--font-body); background: var(--gray-50); color: var(--gray-800); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+/* TOPBAR */
+.topbar { background: var(--navy-dark); border-bottom: 2px solid var(--gold); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topbar-brand { display: flex; align-items: center; gap: 16px; }
+.topbar-logo { font-family: var(--font-display); font-size: 22px; color: var(--white); letter-spacing: 1px; line-height: 1; }
+.topbar-logo span { color: var(--gold); }
+.topbar-badge { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); color: var(--gold); font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.05em; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+.topbar-time { font-size: 12px; color: rgba(255,255,255,0.5); font-weight: 500; }
+.btn-refresh { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); font-family: var(--font-body); font-size: 13px; font-weight: 500; padding: 7px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.btn-refresh:hover { background: rgba(255,255,255,0.14); color: var(--white); }
+.btn-refresh.spinning svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* LAYOUT */
+.layout { display: flex; flex: 1; }
+.sidebar { width: 220px; flex-shrink: 0; background: var(--navy); min-height: calc(100vh - 64px); padding: 24px 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto; }
+.sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+.sidebar-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); text-transform: uppercase; padding: 0 8px; margin-bottom: 8px; }
+.sidebar-link { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: rgba(255,255,255,0.65); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; border: none; background: none; width: 100%; text-align: left; }
+.sidebar-link:hover { background: rgba(255,255,255,0.08); color: var(--white); }
+.sidebar-link.active { background: rgba(212,175,55,0.12); color: var(--gold); }
+.sidebar-link svg { flex-shrink: 0; opacity: 0.7; }
+.sidebar-link.active svg { opacity: 1; }
+.sidebar-count { margin-left: auto; background: rgba(212,175,55,0.2); color: var(--gold); font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px; min-width: 20px; text-align: center; }
+.main { flex: 1; padding: 28px 32px; min-width: 0; overflow-x: hidden; max-width: 100%; }
+
+/* STAT CARDS */
+.stats-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--white); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow); border: 2px solid var(--gray-200); display: flex; align-items: center; gap: 16px; transition: all 0.2s; cursor: pointer; user-select: none; }
+.stat-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: var(--gold); }
+.stat-card.active-filter { border-color: var(--gold); background: rgba(212,175,55,0.05); box-shadow: 0 0 0 3px rgba(212,175,55,0.2), var(--shadow-lg); transform: translateY(-2px); }
+.stat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.stat-icon.navy { background: rgba(29,47,85,0.1); color: var(--navy); }
+.stat-icon.gold { background: rgba(212,175,55,0.12); color: var(--gold-dark); }
+.stat-icon.green { background: var(--green-light); color: var(--green); }
+.stat-icon.blue { background: var(--blue-light); color: var(--blue); }
+.stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+.stat-num { font-family: var(--font-display); font-size: 32px; color: var(--navy); line-height: 1; }
+.stat-label { font-size: 12px; color: var(--gray-500); font-weight: 500; margin-top: 2px; }
+.stat-hint { font-size: 10px; color: var(--gray-400); margin-top: 2px; }
+
+/* TOOLBAR */
+.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.toolbar-title { font-family: var(--font-display); font-size: 24px; color: var(--navy); flex: 1; }
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--white); border: 1px solid var(--gray-200); border-radius: 8px; padding: 8px 14px; width: 240px; }
+.search-box svg { color: var(--gray-400); flex-shrink: 0; }
+.search-box input { border: none; outline: none; font-family: var(--font-body); font-size: 13px; color: var(--gray-800); width: 100%; background: transparent; }
+.search-box input::placeholder { color: var(--gray-400); }
+.filter-select { background: var(--white); border: 1px solid var(--gray-200); border-radius: 8px; padding: 8px 14px; font-family: var(--font-body); font-size: 13px; color: var(--gray-800); cursor: pointer; outline: none; }
+.btn-export { display: flex; align-items: center; gap: 6px; background: var(--navy); color: var(--white); border: none; border-radius: 8px; padding: 9px 18px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.btn-export:hover { background: var(--navy-light); }
+
+/* TABLE */
+.table-wrap { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); overflow: hidden; }
+.table-header { display: grid; grid-template-columns: 44px 1fr 130px 150px 130px 110px 100px 70px; background: var(--navy-dark); padding: 12px 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.6); }
+.table-header .th { padding: 0 8px; }
+.table-body { max-height: calc(100vh - 340px); overflow-y: auto; }
+.lead-row { display: grid; grid-template-columns: 44px 1fr 130px 150px 130px 110px 100px 70px; padding: 13px 20px; border-bottom: 1px solid var(--gray-100); align-items: center; transition: background 0.15s; cursor: pointer; }
+.lead-row:hover { background: #f0f4ff; }
+.lead-row:last-child { border-bottom: none; }
+.lead-row .td { padding: 0 8px; font-size: 13px; }
+.lead-num { font-size: 12px; color: var(--gray-400); font-weight: 600; }
+.lead-name-main { font-weight: 600; color: var(--navy); font-size: 13px; }
+.lead-phone-sub { color: var(--gray-500); font-size: 11px; margin-top: 2px; }
+.lead-city-wrap { display: flex; align-items: center; gap: 6px; }
+.city-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.lead-time { font-size: 12px; color: var(--gray-400); }
+
+/* BADGES & CHIPS */
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.badge-new { background: var(--blue-light); color: var(--blue); }
+.badge-contacted { background: var(--yellow-light); color: var(--yellow); }
+.badge-converted { background: var(--green-light); color: var(--green); }
+.badge-closed { background: var(--gray-100); color: var(--gray-500); }
+.chip { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+.chip-auto { background: rgba(37,99,235,0.1); color: var(--blue); }
+.chip-truck { background: rgba(220,38,38,0.1); color: var(--red); }
+.chip-motorcycle { background: rgba(124,58,237,0.1); color: var(--purple); }
+.chip-pedestrian { background: rgba(22,163,74,0.1); color: var(--green); }
+.chip-rideshare { background: rgba(212,175,55,0.15); color: var(--gold-dark); }
+.chip-other { background: var(--gray-100); color: var(--gray-600); }
+
+/* ACTION BTNS */
+.action-btns { display: flex; gap: 4px; }
+.action-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--gray-200); background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--gray-500); transition: all 0.15s; flex-shrink: 0; }
+.action-btn:hover { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.action-btn.call:hover { background: var(--green); border-color: var(--green); }
+.action-btn.web:hover { background: var(--blue); border-color: var(--blue); }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 80px 40px; }
+.empty-icon { width: 72px; height: 72px; background: rgba(29,47,85,0.07); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: var(--navy); }
+.empty-state h3 { font-family: var(--font-display); font-size: 24px; color: var(--navy); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: var(--gray-500); line-height: 1.6; }
+
+/* DETAIL PANEL */
+.detail-overlay { display: none; position: fixed; inset: 0; background: rgba(10,20,40,0.55); backdrop-filter: blur(4px); z-index: 200; }
+.detail-overlay.open { display: block; }
+.detail-panel { position: fixed; right: 0; top: 0; width: 440px; height: 100vh; background: var(--white); box-shadow: -8px 0 40px rgba(0,0,0,0.2); overflow-y: auto; animation: slideIn 0.25s ease; display: flex; flex-direction: column; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.detail-header { background: var(--navy-dark); padding: 24px; display: flex; justify-content: space-between; align-items: flex-start; flex-shrink: 0; }
+.detail-name { font-family: var(--font-display); font-size: 28px; color: var(--white); margin-bottom: 6px; line-height: 1; }
+.detail-close { background: rgba(255,255,255,0.1); border: none; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: rgba(255,255,255,0.7); transition: all 0.15s; flex-shrink: 0; }
+.detail-close:hover { background: rgba(255,255,255,0.2); color: var(--white); }
+.detail-body { padding: 24px; flex: 1; overflow-y: auto; }
+.detail-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+.detail-action-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 10px; border: none; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.detail-action-btn.call { background: var(--green-light); color: var(--green); }
+.detail-action-btn.call:hover { background: var(--green); color: var(--white); }
+.detail-action-btn.web { background: var(--blue-light); color: var(--blue); }
+.detail-action-btn.web:hover { background: var(--blue); color: var(--white); }
+.detail-action-btn.email { background: var(--purple-light); color: var(--purple); }
+.detail-action-btn.email:hover { background: var(--purple); color: var(--white); }
+.detail-action-btn.maps { background: rgba(212,175,55,0.15); color: var(--gold-dark); }
+.detail-action-btn.maps:hover { background: var(--gold); color: var(--navy); }
+.detail-section { margin-bottom: 22px; }
+.detail-section-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-400); margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--gray-100); }
+.detail-field { display: flex; justify-content: space-between; align-items: flex-start; padding: 7px 0; font-size: 13px; gap: 16px; }
+.detail-field .key { color: var(--gray-500); font-weight: 500; flex-shrink: 0; }
+.detail-field .val { color: var(--navy); font-weight: 600; text-align: right; word-break: break-word; }
+.detail-field .val a { color: var(--blue); text-decoration: none; }
+.detail-field .val a:hover { text-decoration: underline; }
+.status-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.status-btn { padding: 10px; border-radius: 8px; border: 2px solid var(--gray-200); background: var(--white); font-family: var(--font-body); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: center; }
+.status-btn:hover { border-color: var(--navy); }
+.status-btn.sel-new { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+.status-btn.sel-contacted { border-color: var(--yellow); background: var(--yellow-light); color: var(--yellow); }
+.status-btn.sel-converted { border-color: var(--green); background: var(--green-light); color: var(--green); }
+.status-btn.sel-closed { border-color: var(--gray-400); background: var(--gray-100); color: var(--gray-500); }
+.detail-notes textarea { width: 100%; border: 1px solid var(--gray-200); border-radius: 8px; padding: 12px; font-family: var(--font-body); font-size: 13px; color: var(--gray-800); resize: vertical; min-height: 90px; outline: none; transition: border-color 0.15s; }
+.detail-notes textarea:focus { border-color: var(--navy); }
+.btn-save { width: 100%; background: var(--gold); color: var(--navy); border: none; border-radius: 8px; padding: 12px; font-family: var(--font-body); font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; margin-top: 8px; }
+.btn-save:hover { background: var(--gold-light); }
+
+/* MAP */
+.state-map { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 24px; margin-bottom: 24px; }
+.state-map-title { font-family: var(--font-display); font-size: 20px; color: var(--navy); margin-bottom: 16px; }
+.state-map-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.map-legend { display: flex; align-items: center; gap: 14px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--gray-500); font-weight: 500; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; }
+.legend-dot.zero { background: var(--gray-200); }
+.legend-dot.low { background: rgba(212,175,55,0.35); }
+.legend-dot.mid { background: rgba(212,175,55,0.65); }
+.legend-dot.high { background: var(--gold); }
+#us-map-wrap { width: 100%; overflow: hidden; border-radius: 8px; }
+.state-path { stroke: var(--white); stroke-width: 1.5; cursor: pointer; transition: opacity 0.15s; }
+.state-path:hover { opacity: 0.8; stroke-width: 2.5; stroke: var(--navy); }
+.state-path.zero { fill: var(--gray-200); }
+.state-path.low { fill: rgba(212,175,55,0.35); }
+.state-path.mid { fill: rgba(212,175,55,0.65); }
+.state-path.high { fill: var(--gold); }
+.state-label { font-family: var(--font-body); font-size: 7px; font-weight: 700; fill: var(--gray-600); pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+.state-label.has-leads { fill: var(--navy); }
+
+/* LOADING / TOAST */
+.loading-overlay { position: fixed; inset: 0; background: rgba(15,30,61,0.85); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 999; gap: 16px; }
+.loading-overlay.hidden { display: none; }
+.spinner { width: 48px; height: 48px; border: 3px solid rgba(212,175,55,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.loading-text { color: rgba(255,255,255,0.7); font-size: 14px; font-weight: 500; }
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--navy-dark); color: var(--white); padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500; border-left: 3px solid var(--gold); box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(8px); transition: all 0.3s; z-index: 999; pointer-events: none; }
+.toast.show { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 1200px) {
+  .stats-row { grid-template-columns: repeat(3, 1fr); }
+  /* state grid removed */
+}
+
+/* ── MOBILE ────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Topbar */
+  .topbar { padding: 0 16px; height: 56px; }
+  .topbar-badge { display: none; }
+  .topbar-logo { font-size: 18px; }
+  .topbar-time { display: none; }
+  .btn-refresh span { display: none; }
+  .btn-refresh { padding: 7px 10px; }
+
+  /* Layout — stack, add bottom nav padding */
+  .layout { flex-direction: column; }
+  .sidebar { display: none; }
+  .main { padding: 14px 14px 90px; }
+
+  /* Stat cards — 2-column grid, compact row inside each card */
+  .stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 14px;
+    width: 100%;
+  }
+  .stat-card {
+    padding: 12px 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    border-radius: 12px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .stat-icon { width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; }
+  .stat-icon svg { width: 15px; height: 15px; }
+  .stat-num { font-size: 20px; }
+  .stat-label { font-size: 10px; line-height: 1.3; }
+  .stat-hint { display: none; }
+
+  /* Toolbar */
+  .toolbar { gap: 8px; margin-bottom: 12px; }
+  .toolbar-title { font-size: 20px; width: 100%; }
+  .search-box { width: 100%; order: 3; }
+  .filter-select { flex: 1; order: 4; font-size: 12px; padding: 8px 10px; }
+  .btn-export { order: 5; font-size: 12px; padding: 8px 12px; }
+
+  /* Table → Card list */
+  .table-wrap { border-radius: 14px; box-shadow: var(--shadow); }
+  .table-header { display: none; }
+  .table-body { max-height: none; overflow-y: visible; }
+
+  .lead-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--gray-100);
+    cursor: pointer;
+    position: relative;
+  }
+  .lead-row:active { background: var(--gray-50); }
+
+  /* Hide columns we don't need in card view */
+  .lead-row .td { padding: 0; display: none; }
+
+  /* Always show: name, city, type, status, actions */
+  .lead-row .td:nth-child(1) { display: block; } /* num */
+  .lead-row .td:nth-child(2) { display: block; } /* name */
+  .lead-row .td:nth-child(4) { display: block; } /* city */
+  .lead-row .td:nth-child(5) { display: block; } /* type */
+  .lead-row .td:nth-child(7) { display: block; } /* status */
+  .lead-row .td:nth-child(8) { display: block; } /* actions */
+
+  /* Card layout inside the row */
+  .lead-row .td:nth-child(1) {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-size: 11px; color: var(--gray-400);
+  }
+  .lead-row .td:nth-child(2) { margin-bottom: 6px; }
+  .lead-row .td:nth-child(4) { margin-bottom: 6px; font-size: 12px; color: var(--gray-600); }
+  .lead-row .td:nth-child(5) { margin-bottom: 8px; }
+  .lead-row .td:nth-child(7) { margin-bottom: 10px; }
+  .lead-row .td:nth-child(8) { }
+
+  .lead-name-main { font-size: 15px; }
+  .lead-phone-sub { font-size: 12px; color: var(--gray-500); margin-top: 1px; }
+  .lead-city-wrap { font-size: 12px; }
+  .city-dot { width: 6px; height: 6px; }
+
+  /* Action buttons larger for touch */
+  .action-btn { width: 36px; height: 36px; border-radius: 8px; }
+  .action-btn svg { width: 15px; height: 15px; }
+
+  /* Detail panel — full screen on mobile */
+  .detail-panel {
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
+  }
+
+  /* State map */
+  .state-map { padding: 16px; }
+  .state-map-header { flex-direction: column; align-items: flex-start; }
+
+  /* Bottom nav bar */
+  .mobile-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--navy-dark);
+    border-top: 2px solid var(--gold);
+    z-index: 90;
+    height: 60px;
+  }
+  .mobile-nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .mobile-nav-btn svg { width: 20px; height: 20px; }
+  .mobile-nav-btn.active { color: var(--gold); }
+  .mobile-nav-btn .mob-badge {
+    position: absolute;
+    top: 6px;
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 14px;
+  }
+
+  /* Toast above bottom nav */
+  .toast { bottom: 72px; right: 12px; left: 12px; }
+}
+
+/* Desktop — hide mobile nav */
+@media (min-width: 769px) {
+  .mobile-nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay hidden" id="loading"><div class="spinner"></div><div class="loading-text">Loading leads...</div></div>
+<div class="toast" id="toast"></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">ACCIDENT <span>NETWORKS</span></div>
+    <div class="topbar-badge">LEAD DASHBOARD</div>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-time" id="clock"></div>
+    <button class="btn-refresh" id="refresh-btn" onclick="loadLeads()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Status</div>
+    <button class="sidebar-link active" id="sb-all" onclick="sidebarFilter('all', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+      All Leads <span class="sidebar-count" id="count-all">0</span>
+    </button>
+    <button class="sidebar-link" id="sb-new" onclick="sidebarFilter('new', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      New <span class="sidebar-count" id="count-new">0</span>
+    </button>
+    <button class="sidebar-link" id="sb-contacted" onclick="sidebarFilter('contacted', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Contacted <span class="sidebar-count" id="count-contacted">0</span>
+    </button>
+    <button class="sidebar-link" id="sb-converted" onclick="sidebarFilter('converted', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+      Converted <span class="sidebar-count" id="count-converted">0</span>
+    </button>
+    <button class="sidebar-link" id="sb-closed" onclick="sidebarFilter('closed', this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      Closed <span class="sidebar-count" id="count-closed">0</span>
+    </button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Accident Type</div>
+    <button class="sidebar-link" onclick="typeFilter('rear-end')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+      Auto / Rear-End
+    </button>
+    <button class="sidebar-link" onclick="typeFilter('truck')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v3"/><rect width="7" height="7" x="14" y="10" rx="1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>
+      Truck
+    </button>
+    <button class="sidebar-link" onclick="typeFilter('motorcycle')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="M12 17 8 8l-2 4H3"/><path d="m13 8 2 4 2-1 1 4"/><path d="M16 8h3l1 3"/></svg>
+      Motorcycle
+    </button>
+    <button class="sidebar-link" onclick="typeFilter('rideshare')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      Rideshare
+    </button>
+    <button class="sidebar-link" onclick="typeFilter('pedestrian')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><path d="m6 20 4-8 2 2 2-4 4 10"/><path d="m6 12 2-4 4 2"/></svg>
+      Pedestrian
+    </button>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Views</div>
+    <button class="sidebar-link" onclick="toggleMapView(this)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+      Nationwide Map
+    </button>
+    <button class="sidebar-link" onclick="clearFilters()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+      Clear Filters
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STAT CARDS -->
+  <div class="stats-row">
+    <div class="stat-card" id="card-total" onclick="statCardClick('all', this)" title="Show all leads">
+      <div class="stat-icon navy"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div><div class="stat-num" id="stat-total">0</div><div class="stat-label">Total Leads</div><div class="stat-hint">Click to view all</div></div>
+    </div>
+    <div class="stat-card" id="card-new" onclick="statCardClick('new', this)" title="Show new leads">
+      <div class="stat-icon blue"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+      <div><div class="stat-num" id="stat-new">0</div><div class="stat-label">New Today</div><div class="stat-hint">Click to filter</div></div>
+    </div>
+    <div class="stat-card" id="card-converted" onclick="statCardClick('converted', this)" title="Show converted leads">
+      <div class="stat-icon green"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></div>
+      <div><div class="stat-num" id="stat-converted">0</div><div class="stat-label">Converted</div><div class="stat-hint">Click to filter</div></div>
+    </div>
+    <div class="stat-card" id="card-states" onclick="statCardClick('map', this)" title="View nationwide map">
+      <div class="stat-icon gold"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></div>
+      <div><div class="stat-num" id="stat-states">0</div><div class="stat-label">States Active</div><div class="stat-hint">Click for map</div></div>
+    </div>
+    <div class="stat-card" id="card-rate" onclick="statCardClick('contacted', this)" title="Show contacted leads">
+      <div class="stat-icon purple"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div><div class="stat-num" id="stat-rate">0%</div><div class="stat-label">Conv. Rate</div><div class="stat-hint">Click to see pipeline</div></div>
+    </div>
+  </div>
+
+  <!-- MAP -->
+  <div class="state-map" id="map-view" style="display:none">
+    <div class="state-map-header">
+      <div class="state-map-title">Nationwide Lead Activity</div>
+      <div class="map-legend">
+        <span class="legend-item"><span class="legend-dot zero"></span>No leads</span>
+        <span class="legend-item"><span class="legend-dot low"></span>Low</span>
+        <span class="legend-item"><span class="legend-dot mid"></span>Medium</span>
+        <span class="legend-item"><span class="legend-dot high"></span>High</span>
+      </div>
+    </div>
+    <div id="us-map-wrap" style="min-height:300px;background:var(--gray-50);border-radius:8px;"></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-title" id="view-title">All Leads</div>
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Search name, city, phone..." id="search-input" oninput="renderTable()">
+    </div>
+    <select class="filter-select" id="state-filter" onchange="renderTable()">
+      <option value="">All States</option>
+    </select>
+    <button class="btn-export" onclick="exportCSV()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+      Export CSV
+    </button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <div class="th">#</div>
+      <div class="th">Name / Phone</div>
+      <div class="th">Phone</div>
+      <div class="th">City, State</div>
+      <div class="th">Accident Type</div>
+      <div class="th">Submitted</div>
+      <div class="th">Status</div>
+      <div class="th">Actions</div>
+    </div>
+    <div class="table-body" id="table-body"></div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="overlayClick(event)">
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div>
+        <div class="detail-name" id="d-name">—</div>
+        <div id="d-badge"></div>
+      </div>
+      <button class="detail-close" onclick="closeDetail()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="detail-body">
+
+      <!-- Quick action buttons -->
+      <div class="detail-actions" id="d-actions"></div>
+
+      <!-- Contact -->
+      <div class="detail-section">
+        <div class="detail-section-title">Contact Information</div>
+        <div class="detail-field"><span class="key">Phone</span><span class="val" id="d-phone">—</span></div>
+        <div class="detail-field" id="d-email-row" style="display:none"><span class="key">Email</span><span class="val" id="d-email">—</span></div>
+        <div class="detail-field"><span class="key">City</span><span class="val" id="d-city">—</span></div>
+        <div class="detail-field"><span class="key">State</span><span class="val" id="d-state">—</span></div>
+        <div class="detail-field"><span class="key">County</span><span class="val" id="d-county">—</span></div>
+        <div class="detail-field" id="d-address-row" style="display:none"><span class="key">Address</span><span class="val" id="d-address">—</span></div>
+      </div>
+
+      <!-- Case -->
+      <div class="detail-section">
+        <div class="detail-section-title">Case Details</div>
+        <div class="detail-field"><span class="key">Accident Type</span><span class="val" id="d-accident">—</span></div>
+        <div class="detail-field"><span class="key">Source Page</span><span class="val" id="d-source">—</span></div>
+        <div class="detail-field"><span class="key">Page URL</span><span class="val" id="d-url">—</span></div>
+        <div class="detail-field"><span class="key">Submitted</span><span class="val" id="d-time">—</span></div>
+      </div>
+
+      <!-- Status -->
+      <div class="detail-section">
+        <div class="detail-section-title">Lead Status</div>
+        <div class="status-selector">
+          <button class="status-btn" onclick="setStatus('New')">🔵 New</button>
+          <button class="status-btn" onclick="setStatus('Contacted')">🟡 Contacted</button>
+          <button class="status-btn" onclick="setStatus('Converted')">🟢 Converted</button>
+          <button class="status-btn" onclick="setStatus('Closed')">⚫ Closed</button>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="detail-section detail-notes">
+        <div class="detail-section-title">Notes</div>
+        <textarea id="d-notes" placeholder="Add notes about this lead..."></textarea>
+        <button class="btn-save" onclick="saveNotes()">Save Notes</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mobile-nav-btn active" id="mob-all" onclick="mobileNav('all', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+    All
+  </button>
+  <button class="mobile-nav-btn" id="mob-new" onclick="mobileNav('new', this)" style="position:relative">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    New
+    <span class="mob-badge" id="mob-new-badge" style="display:none">0</span>
+  </button>
+  <button class="mobile-nav-btn" id="mob-contacted" onclick="mobileNav('contacted', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    In Progress
+  </button>
+  <button class="mobile-nav-btn" id="mob-converted" onclick="mobileNav('converted', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+    Won
+  </button>
+  <button class="mobile-nav-btn" id="mob-map" onclick="mobileNav('map', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+    Map
+  </button>
+</nav>
+
+<script>
+var SHEET_ID = '19dfJaRocEps21G2HqDO83Mncsk_03TAk8rn1LLYmgmo';
+// Get your free Gemini API key at: https://aistudio.google.com/app/apikey
+var SEED_DATA = [{"timestamp": "2026-05-21", "name": "John Doe", "phone": "813-555-0101", "accidentType": "Rear-end", "city": "Tampa", "state": "FL", "county": "Hillsborough", "source": "google.com", "pageUrl": "accidentnetworks.com/tampa", "status": "New", "notes": "", "email": "", "address": ""}, {"timestamp": "2026-05-21", "name": "Jane Smith", "phone": "713-555-0102", "accidentType": "T-Bone", "city": "Houston", "state": "TX", "county": "Harris", "source": "bing.com", "pageUrl": "accidentnetworks.com/houston", "status": "Contacted", "notes": "", "email": "", "address": ""}, {"timestamp": "2026-05-21", "name": "Mike Johnson", "phone": "312-555-0103", "accidentType": "Sideswipe", "city": "Chicago", "state": "IL", "county": "Cook", "source": "facebook.com", "pageUrl": "accidentnetworks.com/chicago", "status": "Converted", "notes": "", "email": "", "address": ""}, {"timestamp": "2026-05-21", "name": "Sarah Williams", "phone": "404-555-0104", "accidentType": "Head-on", "city": "Atlanta", "state": "GA", "county": "Fulton", "source": "google.com", "pageUrl": "accidentnetworks.com/atlanta", "status": "New", "notes": "", "email": "", "address": ""}, {"timestamp": "2026-05-21", "name": "David Brown", "phone": "206-555-0105", "accidentType": "Multi-car", "city": "Seattle", "state": "WA", "county": "King", "source": "direct", "pageUrl": "accidentnetworks.com/seattle", "status": "Closed", "notes": "", "email": "", "address": ""}];
+var GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
+
+var allLeads      = [];
+var filteredLeads = [];
+var activeView    = 'all';
+var activeType    = '';
+var activeCard    = 'card-total';
+var currentLead   = null;
+var leadStatuses  = {};
+var leadNotes     = {};
+var showMap       = false;
+
+// CLOCK
+function updateClock() {
+  var now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' ' +
+    now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock,1000); updateClock();
+
+// LOAD
+async function loadLeads() {
+  var btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  document.getElementById('loading').classList.remove('hidden');
+
+  var done = function() {
+    document.getElementById('loading').classList.add('hidden');
+    btn.classList.remove('spinning');
+    updateAll();
+  };
+
+  // ── Module: Gemini Sheet Reader ─────────────────────────────────────────
+  // Uses Gemini API to read the public Google Sheet directly.
+  // No Apps Script. No CORS issue. No deployment.
+  // Sheet export URL works as an external file input to Gemini.
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY') {
+    showToast('Add your free Gemini API key to GEMINI_API_KEY');
+    allLeads = SEED_DATA;
+    done();
+    return;
+  }
+
+  var sheetUrl = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=xlsx';
+  var prompt   = 'Read this Google Sheet. Return ONLY a JSON array. Each row is an object with these exact keys: timestamp, name, phone, accidentType, city, state, county, source, pageUrl, status, notes. Skip the header row. If a cell is empty use empty string. Return only the raw JSON array, no markdown, no explanation.';
+
+  try {
+    var controller = new AbortController();
+    var t = setTimeout(function(){ controller.abort(); }, 20000);
+
+    var res = await fetch(
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + GEMINI_API_KEY,
+      {
+        method: 'POST',
+        signal: controller.signal,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { file_data: { mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', file_uri: sheetUrl } }
+            ]
+          }]
+        })
+      }
+    );
+
+    clearTimeout(t);
+    var data = await res.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || 'Gemini API error');
+    }
+
+    var text = data.candidates && data.candidates[0] && data.candidates[0].content &&
+               data.candidates[0].content.parts && data.candidates[0].content.parts[0].text;
+
+    if (!text) throw new Error('No response from Gemini');
+
+    // Strip any markdown code fences
+    var clean = text.replace(/^```json?\s*/i, '').replace(/```\s*$/,'').trim();
+    var leads = JSON.parse(clean);
+
+    if (Array.isArray(leads) && leads.length > 0) {
+      allLeads = leads.filter(function(l){ return l.name; });
+      showToast('Loaded ' + allLeads.length + ' lead' + (allLeads.length !== 1 ? 's' : '') + ' from sheet');
+    } else {
+      allLeads = SEED_DATA;
+      showToast('Sheet empty — showing seed data');
+    }
+  } catch(err) {
+    console.error('Gemini load error:', err);
+    allLeads = SEED_DATA;
+    showToast('Sheet load failed — showing cached data');
+  }
+
+  done();
+}
+
+
+function updateAll() {
+  updateStats();
+  buildStateFilter();
+  // Only build map if map view is currently visible
+  if (document.getElementById('map-view') && document.getElementById('map-view').style.display !== 'none') {
+    buildStateMap();
+  }
+  renderTable();
+  updateSidebarCounts();
+}
+
+function getStatus(lead) {
+  var idx = allLeads.indexOf(lead);
+  return leadStatuses[idx] || lead.status || 'New';
+}
+
+function updateStats() {
+  var total     = allLeads.length;
+  var todayNew  = allLeads.filter(function(l){return isToday(l.timestamp);}).length;
+  var converted = allLeads.filter(function(l){return getStatus(l)==='Converted';}).length;
+  var states    = new Set(allLeads.map(function(l){return l.state;})).size;
+  var rate      = total>0 ? Math.round(converted/total*100) : 0;
+  document.getElementById('stat-total').textContent     = total;
+  document.getElementById('stat-new').textContent       = todayNew;
+  document.getElementById('stat-converted').textContent = converted;
+  document.getElementById('stat-states').textContent    = states;
+  document.getElementById('stat-rate').textContent      = rate+'%';
+}
+
+function updateSidebarCounts() {
+  document.getElementById('count-all').textContent       = allLeads.length;
+  document.getElementById('count-new').textContent       = allLeads.filter(function(l){return getStatus(l)==='New';}).length;
+  document.getElementById('count-contacted').textContent = allLeads.filter(function(l){return getStatus(l)==='Contacted';}).length;
+  document.getElementById('count-converted').textContent = allLeads.filter(function(l){return getStatus(l)==='Converted';}).length;
+  document.getElementById('count-closed').textContent    = allLeads.filter(function(l){return getStatus(l)==='Closed';}).length;
+  // Mobile new badge
+  var newCount = allLeads.filter(function(l){return getStatus(l)==='New';}).length;
+  var badge = document.getElementById('mob-new-badge');
+  if (badge) { badge.textContent = newCount; badge.style.display = newCount > 0 ? 'inline' : 'none'; }
+}
+
+function isToday(ts) {
+  if(!ts) return false;
+  return new Date(ts).toDateString() === new Date().toDateString();
+}
+
+// MOBILE NAV
+function mobileNav(view, el) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('search-input').value = '';
+  document.getElementById('state-filter').value = '';
+  if (view === 'map') {
+    showMap = true;
+    document.getElementById('map-view').style.display = 'block';
+    buildStateMap();
+    buildStateMap();
+    activeView = 'all';
+  } else {
+    showMap = false;
+    document.getElementById('map-view').style.display = 'none';
+    activeView = view;
+  }
+  updateViewTitle();
+  renderTable();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// STAT CARD CLICK
+function statCardClick(view, cardEl) {
+  document.querySelectorAll('.stat-card').forEach(function(c){c.classList.remove('active-filter');});
+  cardEl.classList.add('active-filter');
+  document.getElementById('search-input').value = '';
+  document.getElementById('state-filter').value = '';
+  if (view === 'map') {
+    showMap = true;
+    document.getElementById('map-view').style.display = 'block';
+    activeView = 'all';
+  } else {
+    showMap = false;
+    document.getElementById('map-view').style.display = 'none';
+    activeView = view;
+  }
+  updateViewTitle();
+  renderTable();
+  // Sync sidebar
+  document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active');});
+  var sbMap = {all:'sb-all',new:'sb-new',contacted:'sb-contacted',converted:'sb-converted'};
+  if (sbMap[view]) document.getElementById(sbMap[view]).classList.add('active');
+}
+
+// SIDEBAR FILTER
+function sidebarFilter(view, el) {
+  document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active');});
+  el.classList.add('active');
+  activeView = view;
+  showMap = false;
+  document.getElementById('map-view').style.display = 'none';
+  document.getElementById('search-input').value = '';
+  document.getElementById('state-filter').value = '';
+  updateViewTitle();
+  renderTable();
+  // Sync cards
+  document.querySelectorAll('.stat-card').forEach(function(c){c.classList.remove('active-filter');});
+  var cardMap = {all:'card-total',new:'card-new',contacted:'card-rate',converted:'card-converted'};
+  if (cardMap[view]) document.getElementById(cardMap[view]).classList.add('active-filter');
+}
+
+function typeFilter(type) {
+  document.getElementById('search-input').value = '';
+  activeView = 'all';
+  activeType = type;
+  updateViewTitle();
+  renderTable();
+  document.getElementById('view-title').textContent = type.charAt(0).toUpperCase()+type.slice(1)+' Accidents';
+}
+
+function toggleMapView(el) {
+  showMap = !showMap;
+  document.getElementById('map-view').style.display = showMap ? 'block' : 'none';
+  if (showMap) buildStateMap();
+  el.classList.toggle('active', showMap);
+}
+
+function clearFilters() {
+  document.getElementById('search-input').value = '';
+  document.getElementById('state-filter').value = '';
+  activeView = 'all';
+  activeType = '';
+  showMap = false;
+  document.getElementById('map-view').style.display = 'none';
+  document.querySelectorAll('.sidebar-link').forEach(function(l){l.classList.remove('active');});
+  document.getElementById('sb-all').classList.add('active');
+  document.querySelectorAll('.stat-card').forEach(function(c){c.classList.remove('active-filter');});
+  document.getElementById('card-total').classList.add('active-filter');
+  updateViewTitle();
+  renderTable();
+  showToast('Filters cleared');
+}
+
+function updateViewTitle() {
+  var titles = {all:'All Leads',new:'New Leads',contacted:'Contacted Leads',converted:'Converted Leads',closed:'Closed Leads'};
+  document.getElementById('view-title').textContent = titles[activeView] || 'All Leads';
+}
+
+// STATE MAP
+// US STATE SVG PATHS — simplified but accurate outlines
+// Map uses D3 + TopoJSON for real geographic shapes
+// ── MAP MODULE ──────────────────────────────────────────────────────────────
+// Modular, self-contained. buildStateMap() is the only public entry point.
+// Strategy: load D3 + TopoJSON from CDN (proper geographic shapes).
+// Fallback: alphabetical state grid if CDN unavailable.
+
+var _mapState = { loaded: false, loading: false };
+
+function buildStateMap() {
+  var counts = {};
+  allLeads.forEach(function(l){ if(l.state) counts[l.state]=(counts[l.state]||0)+1; });
+  var max = Math.max.apply(null, Object.values(counts).concat([1]));
+
+  // Already rendered — just recolor
+  if (_mapState.loaded) {
+    _mapRecolor(counts, max);
+    return;
+  }
+
+  // Already loading — don't double-load
+  if (_mapState.loading) return;
+  _mapState.loading = true;
+
+  var wrap = document.getElementById('us-map-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '<div style="padding:40px;text-align:center;color:var(--gray-400);font-size:13px">Loading map…</div>';
+
+  // Load D3 first, then TopoJSON, then data — each step only on success
+  _loadScript('https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js',
+    function() {
+      _loadScript('https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js',
+        function() {
+          fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json')
+            .then(function(r){ return r.json(); })
+            .then(function(us){
+              _mapState.loaded = true;
+              _mapState.loading = false;
+              _renderD3Map(us, counts, max);
+            })
+            .catch(function(){ _mapState.loading = false; _renderGridMap(counts, max); });
+        },
+        function(){ _mapState.loading = false; _renderGridMap(counts, max); }
+      );
+    },
+    function(){ _mapState.loading = false; _renderGridMap(counts, max); }
+  );
+}
+
+// Load a script with separate success and error callbacks
+function _loadScript(src, onSuccess, onError) {
+  var s = document.createElement('script');
+  s.src = src;
+  s.onload  = onSuccess;
+  s.onerror = onError || function(){};
+  document.head.appendChild(s);
+}
+
+function _stateColor(abbr, counts, max) {
+  var n = counts[abbr] || 0;
+  if (n === 0) return '#e2e8f0';
+  if (n < max * 0.33) return 'rgba(212,175,55,0.4)';
+  if (n < max * 0.66) return 'rgba(212,175,55,0.7)';
+  return '#D4AF37';
+}
+
+var _FIPS = {
+  "01":"AL","02":"AK","04":"AZ","05":"AR","06":"CA","08":"CO","09":"CT","10":"DE",
+  "12":"FL","13":"GA","15":"HI","16":"ID","17":"IL","18":"IN","19":"IA","20":"KS",
+  "21":"KY","22":"LA","23":"ME","24":"MD","25":"MA","26":"MI","27":"MN","28":"MS",
+  "29":"MO","30":"MT","31":"NE","32":"NV","33":"NH","34":"NJ","35":"NM","36":"NY",
+  "37":"NC","38":"ND","39":"OH","40":"OK","41":"OR","42":"PA","44":"RI","45":"SC",
+  "46":"SD","47":"TN","48":"TX","49":"UT","50":"VT","51":"VA","53":"WA","54":"WV",
+  "55":"WI","56":"WY"
+};
+
+function _renderD3Map(us, counts, max) {
+  var wrap = document.getElementById('us-map-wrap');
+  wrap.innerHTML = '';
+  var w = wrap.offsetWidth || 800;
+  var h = Math.round(w * 0.625);
+
+  var svg = d3.select(wrap).append('svg')
+    .attr('viewBox', '0 0 ' + w + ' ' + h)
+    .attr('width', '100%')
+    .attr('height', 'auto')
+    .style('display', 'block')
+    .style('border-radius', '8px');
+
+  var projection = d3.geoAlbersUsa().fitSize([w, h],
+    topojson.feature(us, us.objects.states));
+  var path = d3.geoPath().projection(projection);
+  var states = topojson.feature(us, us.objects.states);
+
+  svg.append('g').selectAll('path')
+    .data(states.features)
+    .enter().append('path')
+    .attr('d', path)
+    .attr('fill', function(d) {
+      var a = _FIPS[String(d.id).padStart(2,'0')] || '';
+      return _stateColor(a, counts, max);
+    })
+    .attr('stroke', '#fff')
+    .attr('stroke-width', '0.8')
+    .attr('data-state', function(d){ return _FIPS[String(d.id).padStart(2,'0')] || ''; })
+    .style('cursor', 'pointer')
+    .on('click', function(ev, d) {
+      var a = _FIPS[String(d.id).padStart(2,'0')] || '';
+      if (a) filterState(a);
+    })
+    .append('title')
+    .text(function(d) {
+      var a = _FIPS[String(d.id).padStart(2,'0')] || '';
+      var n = counts[a] || 0;
+      return a + ': ' + n + (n === 1 ? ' lead' : ' leads');
+    });
+
+  // State labels
+  states.features.forEach(function(d) {
+    var a  = _FIPS[String(d.id).padStart(2,'0')] || '';
+    var ct = path.centroid(d);
+    if (!a || !ct || isNaN(ct[0])) return;
+    var n = counts[a] || 0;
+    svg.append('text')
+      .attr('x', ct[0]).attr('y', ct[1])
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('pointer-events', 'none')
+      .style('font-family', 'Inter,sans-serif')
+      .style('font-size', w > 600 ? '7px' : '5px')
+      .style('font-weight', '700')
+      .style('fill', n > 0 ? '#0f1e3d' : '#94a3b8')
+      .text(n > 0 ? a + ' ' + n : a);
+  });
+
+  // State borders
+  svg.append('path')
+    .datum(topojson.mesh(us, us.objects.states, function(a, b){ return a !== b; }))
+    .attr('fill', 'none')
+    .attr('stroke', '#fff')
+    .attr('stroke-width', '0.5')
+    .attr('pointer-events', 'none')
+    .attr('d', path);
+}
+
+function _mapRecolor(counts, max) {
+  document.querySelectorAll('[data-state]').forEach(function(el) {
+    var a = el.getAttribute('data-state');
+    if (a) el.setAttribute('fill', _stateColor(a, counts, max));
+  });
+}
+
+// Clean alphabetical grid fallback — used if CDN is blocked
+function _renderGridMap(counts, max) {
+  var states = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA",
+                "HI","ID","IL","IN","IA","KS","KY","LA","ME","MD",
+                "MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ",
+                "NM","NY","NC","ND","OH","OK","OR","PA","RI","SC",
+                "SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
+  var wrap = document.getElementById('us-map-wrap');
+  wrap.innerHTML = '<p style="font-size:11px;color:var(--gray-400);padding:8px 0 4px;text-align:center">Map CDN unavailable — showing grid view. Click a state to filter.</p>' +
+    '<div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;padding:8px">' +
+    states.map(function(s) {
+      var n   = counts[s] || 0;
+      var bg  = _stateColor(s, counts, max);
+      var col = n > 0 ? '#0f1e3d' : '#64748b';
+      var el = '<div data-gs="' + s + '" title="' + s + ': ' + n + ' leads" ';
+      el += 'style="background:' + bg + ';color:' + col + ';border-radius:6px;padding:6px 2px;';
+      el += 'text-align:center;font-size:10px;font-weight:700;cursor:pointer;aspect-ratio:1;';
+      el += 'display:flex;flex-direction:column;align-items:center;justify-content:center">';
+      el += s + (n > 0 ? '<br><span style="font-size:9px">' + n + '</span>' : '') + '</div>';
+      return el;
+    }).join('') + '</div>';
+}
+
+
+function buildStateFilter() {
+  var states = allLeads.map(function(l){return l.state;}).filter(Boolean);
+  states = states.filter(function(v,i,a){return a.indexOf(v)===i;}).sort();
+  document.getElementById('state-filter').innerHTML = '<option value="">All States</option>' +
+    states.map(function(s){return '<option value="'+s+'">'+s+'</option>';}).join('');
+}
+
+function filterState(state) {
+  document.getElementById('state-filter').value = state;
+  activeView = 'all';
+  showMap = false;
+  document.getElementById('map-view').style.display = 'none';
+  document.getElementById('view-title').textContent = state + ' Leads';
+  renderTable();
+}
+
+// RENDER TABLE
+function renderTable() {
+  var search = document.getElementById('search-input').value.toLowerCase();
+  var stateF = document.getElementById('state-filter').value;
+
+  filteredLeads = allLeads.filter(function(l) {
+    var s = getStatus(l).toLowerCase();
+    if (activeView !== 'all' && s !== activeView) return false;
+    if (stateF && l.state !== stateF) return false;
+    if (activeType && !(l.accidentType||'').toLowerCase().includes(activeType.toLowerCase())) return false;
+    if (search) {
+      var hay = ((l.name||'')+(l.phone||'')+(l.city||'')+(l.state||'')+(l.accidentType||'')+(l.email||'')).toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  var body = document.getElementById('table-body');
+  if (!filteredLeads.length) {
+    body.innerHTML = '<div class="empty-state"><div class="empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3>No Leads Found</h3><p>Adjust your search or filters.</p></div>';
+    return;
+  }
+
+  body.innerHTML = filteredLeads.map(function(lead, i) {
+    var idx    = allLeads.indexOf(lead);
+    var status = getStatus(lead);
+    var badgeMap = {New:'badge-new',Contacted:'badge-contacted',Converted:'badge-converted',Closed:'badge-closed'};
+    var badgeCls = badgeMap[status]||'badge-new';
+    var type     = (lead.accidentType||'other').toLowerCase();
+    var chipMap  = {auto:'chip-auto',rear:'chip-auto',truck:'chip-truck',moto:'chip-motorcycle',pedestrian:'chip-pedestrian',rideshare:'chip-rideshare',uber:'chip-rideshare'};
+    var chipCls  = 'chip-other';
+    for (var k in chipMap) { if (type.includes(k)) { chipCls = chipMap[k]; break; } }
+    var typeLabel = (lead.accidentType||'Other').replace(/-/g,' ');
+    typeLabel = typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1);
+    var time  = lead.timestamp ? new Date(lead.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+    var phone = lead.phone||'—';
+    var phoneClean = phone.replace(/\D/g,'');
+
+    return '<div class="lead-row" onclick="openDetail('+idx+')" title="Click for full details">' +
+      '<div class="td lead-num">'+(i+1)+'</div>' +
+      '<div class="td"><div class="lead-name-main">'+(lead.name||'—')+'</div><div class="lead-phone-sub">'+(lead.email||phone)+'</div></div>' +
+      '<div class="td" style="color:var(--gray-600);font-size:12px">'+phone+'</div>' +
+      '<div class="td"><div class="lead-city-wrap"><span class="city-dot"></span><span>'+(lead.city||'—')+', '+(lead.state||'—')+'</span></div></div>' +
+      '<div class="td"><span class="chip '+chipCls+'">'+typeLabel+'</span></div>' +
+      '<div class="td lead-time">'+time+'</div>' +
+      '<div class="td"><span class="badge '+badgeCls+'">'+status+'</span></div>' +
+      '<div class="td"><div class="action-btns">' +
+        '<button class="action-btn call" onclick="event.stopPropagation();callLead(\''+phoneClean+'\')" title="Call '+phone+'">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>' +
+        '</button>' +
+        (lead.pageUrl ? '<button class="action-btn web" onclick="event.stopPropagation();window.open(\''+lead.pageUrl+'\',\'_blank\')" title="Open source page">' +
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+        '</button>' : '') +
+      '</div></div>' +
+      '</div>';
+  }).join('');
+}
+
+// DETAIL PANEL
+function openDetail(idx) {
+  currentLead = idx;
+  var l = allLeads[idx];
+  if (!l) return;
+
+  var status   = getStatus(l);
+  var badgeMap = {New:'badge-new',Contacted:'badge-contacted',Converted:'badge-converted',Closed:'badge-closed'};
+  var phone    = l.phone||'';
+  var phoneClean = phone.replace(/\D/g,'');
+  var pageUrl  = l.pageUrl||'';
+
+  document.getElementById('d-name').textContent  = l.name||'Unknown';
+  document.getElementById('d-badge').innerHTML   = '<span class="badge '+(badgeMap[status]||'badge-new')+'">'+status+'</span>';
+  document.getElementById('d-phone').innerHTML   = phone ? '<a href="tel:'+phoneClean+'">'+phone+'</a>' : '—';
+  document.getElementById('d-city').textContent  = l.city||'—';
+  document.getElementById('d-state').textContent = l.state||'—';
+  document.getElementById('d-county').textContent= l.county||'—';
+  document.getElementById('d-accident').textContent = l.accidentType||'—';
+  document.getElementById('d-source').textContent   = l.source||'—';
+  document.getElementById('d-time').textContent     = l.timestamp ? new Date(l.timestamp).toLocaleString() : '—';
+  document.getElementById('d-notes').value          = leadNotes[idx]||'';
+
+  // Email row
+  var emailRow = document.getElementById('d-email-row');
+  var emailEl  = document.getElementById('d-email');
+  if (l.email) {
+    emailRow.style.display = 'flex';
+    emailEl.innerHTML = '<a href="mailto:'+l.email+'">'+l.email+'</a>';
+  } else { emailRow.style.display = 'none'; }
+
+  // Address row
+  var addrRow = document.getElementById('d-address-row');
+  var addrEl  = document.getElementById('d-address');
+  if (l.address) {
+    addrRow.style.display = 'flex';
+    var mapsUrl = 'https://maps.google.com/?q=' + encodeURIComponent(l.address);
+    addrEl.innerHTML = '<a href="'+mapsUrl+'" target="_blank">'+l.address+'</a>';
+  } else { addrRow.style.display = 'none'; }
+
+  // Page URL
+  var urlEl = document.getElementById('d-url');
+  urlEl.innerHTML = pageUrl ? '<a href="'+pageUrl+'" target="_blank">'+pageUrl.replace('https://','')+'</a>' : '—';
+
+  // Quick action buttons
+  var actions = document.getElementById('d-actions');
+  var btns = '';
+  if (phoneClean) btns += '<a class="detail-action-btn call" href="tel:'+phoneClean+'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> Call Now</a>';
+  if (l.email)   btns += '<a class="detail-action-btn email" href="mailto:'+l.email+'"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> Email</a>';
+  if (pageUrl)   btns += '<a class="detail-action-btn web" href="'+pageUrl+'" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg> Source Page</a>';
+  if (l.address) { var mUrl = 'https://maps.google.com/?q='+encodeURIComponent(l.address); btns += '<a class="detail-action-btn maps" href="'+mUrl+'" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg> Directions</a>'; }
+  actions.innerHTML = btns;
+
+  // Status buttons
+  document.querySelectorAll('.status-btn').forEach(function(btn){
+    btn.className = 'status-btn';
+    var lbl = btn.textContent.replace(/[^a-zA-Z]/g,'').toLowerCase();
+    if (status.toLowerCase() === lbl) btn.className = 'status-btn sel-'+status.toLowerCase();
+  });
+
+  document.getElementById('detail-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function overlayClick(e) {
+  if (e.target === document.getElementById('detail-overlay')) closeDetail();
+}
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentLead = null;
+}
+
+function setStatus(status) {
+  if (currentLead === null) return;
+  leadStatuses[currentLead] = status;
+  var badgeMap = {New:'badge-new',Contacted:'badge-contacted',Converted:'badge-converted',Closed:'badge-closed'};
+  document.getElementById('d-badge').innerHTML = '<span class="badge '+(badgeMap[status]||'badge-new')+'">'+status+'</span>';
+  document.querySelectorAll('.status-btn').forEach(function(btn){
+    btn.className = 'status-btn';
+    var lbl = btn.textContent.replace(/[^a-zA-Z]/g,'').toLowerCase();
+    if (status.toLowerCase() === lbl) btn.className = 'status-btn sel-'+status.toLowerCase();
+  });
+  renderTable(); updateStats(); updateSidebarCounts();
+  showToast('Status → ' + status);
+}
+
+function saveNotes() {
+  if (currentLead === null) return;
+  leadNotes[currentLead] = document.getElementById('d-notes').value;
+  showToast('Notes saved');
+}
+
+function callLead(phone) { if(phone) window.location.href='tel:'+phone; }
+
+// EXPORT
+function exportCSV() {
+  var headers = ['Name','Phone','Email','City','State','County','Address','Accident Type','Status','Submitted','Source','Page URL'];
+  var rows = filteredLeads.map(function(l){
+    return [l.name,l.phone,l.email,l.city,l.state,l.county,l.address,l.accidentType,getStatus(l),l.timestamp,l.source,l.pageUrl]
+      .map(function(v){return '"'+(v||'').replace(/"/g,'""')+'"';}).join(',');
+  });
+  var csv = [headers.join(',')].concat(rows).join('\n');
+  var a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download = 'accident-networks-leads-'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+  showToast('Exported '+filteredLeads.length+' leads');
+}
+
+// TOAST
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+// INIT
+loadLeads();
+</script>
+</body>
+</html>
